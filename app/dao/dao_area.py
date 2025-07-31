@@ -30,13 +30,13 @@ class AreaDAO:
             logger.error(f"Error al insertar el área: {e}")
             return False
         
-    def insertar_area_lotes_DAO(self, lista_areas: List[dict]) -> bool:
+    def insertar_area_lotes_DAO(self, lista_areas: List[Area]) -> bool:
             if not isinstance(lista_areas, List):
                 logger.error(f"Tipo de dato inválido: se esperaba una lista")
                 raise TypeError("Se esperaba una lista")
             
             query = "INSERT INTO AREA(NombreArea) VALUES (%s)"
-            datos = [(u["nombre_area"],) for u in lista_areas]
+            datos = [(u.nombre_area,) for u in lista_areas]
             try:
                 with self.conexion.obtener_cursor() as cursor:
                     cursor.executemany(query, datos)

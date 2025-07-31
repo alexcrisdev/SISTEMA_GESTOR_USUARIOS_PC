@@ -33,6 +33,18 @@ class ComputadoraDAO:
             logger.error(f"Error al insertar la computadora: {e}")
             return False
         
+    def insertar_computadoras_lote(self, lista_pc: List[Computadora]) -> bool:
+        if not isinstance(lista_pc, list):
+            logger.error("Tipo de dato inválido: Se esperaba una lista")
+            raise TypeError("Se esperana una lista de usuarios")
+        
+        query = """
+            INSERT INTO COMPUTADORA(IdComputadora, ClaveComputadora, AccesoriosComputadora, CodigoKSDComputadora, TipoComputadora, RedComputadora)
+            VALUES(%s,%s,%s,%s,%s,%s)
+        """
+        valores = ((u["id_computadora"], u["clave_computadora"], u["accesorios_computadora"],
+                    u["codigo_ksd_computadora"], u["tipo_computadora"], u["red_computadora"]) for u in lista_pc)
+
     def actualizar_computadora_DAO(self, nueva_computadora: Computadora, id_anterior: str) -> bool:
         if not isinstance(nueva_computadora, Computadora):
             logger.error("Tipo de dato inválido: Se esperaba un objeto de la clase computadora")

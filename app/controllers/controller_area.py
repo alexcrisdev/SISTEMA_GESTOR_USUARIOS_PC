@@ -37,7 +37,8 @@ def crear_area():
 def crear_areas_lotes():
     datos = request.get_json()
     try:
-        areas = area_dao.insertar_area_lotes_DAO(datos)
+        lista_objetos_area = [Area(nombre_area=d["nombre_area"]) for d in datos]
+        areas = area_dao.insertar_area_lotes_DAO(lista_objetos_area)
         if areas:
             return jsonify({'mensaje': f"{len(datos)} creadas correctamente"}), 201
         else: 

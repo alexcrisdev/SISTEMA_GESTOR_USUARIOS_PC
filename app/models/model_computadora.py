@@ -1,3 +1,4 @@
+from typing import Optional
 from enum import Enum
 
 class TipoComputadora(Enum):
@@ -10,7 +11,7 @@ class RedComputadora(Enum):
     GRUPO_TRABAJO = "Grupo de trabajo"
 
 class Computadora:
-    def __init__(self, id_computadora: str, clave_computadora: str, accesorios_computadora: str, codigo_ksd_computadora: str,
+    def __init__(self, id_computadora: str, clave_computadora: str, accesorios_computadora: str, codigo_ksd_computadora: Optional[str],
                  tipo_computadora: TipoComputadora, red_computadora: RedComputadora):
         self.id_computadora = id_computadora
         self.clave_computadora = clave_computadora
@@ -50,7 +51,7 @@ class Computadora:
     def codigo_ksd_computadora(self) -> str:
         return self._codigo_ksd_computadora
     @codigo_ksd_computadora.setter
-    def codigo_ksd_computadora(self, valor: str) -> None:
+    def codigo_ksd_computadora(self, valor: Optional[str]) -> None:
         if valor:
             if len(valor) != 20:
                 raise ValueError("El valor debe contener 20 caracteres")
@@ -75,3 +76,13 @@ class Computadora:
         if not isinstance(valor, RedComputadora):
             raise ValueError("Tipo de red no válido")
         self._red_computadora = valor
+
+    def to_dict(self) -> dict:
+        return {
+            "id_computadora": self.id_computadora,
+            "clave_computadora": self.clave_computadora,
+            "accesorios_computadora": self.accesorios_computadora,
+            "codigo_ksd_computadora": self.codigo_ksd_computadora,
+            "tipo_computadora": self.tipo_computadora.value,
+            "red_computadora": self.red_computadora.value
+        }

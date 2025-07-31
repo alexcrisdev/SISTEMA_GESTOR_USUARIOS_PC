@@ -64,13 +64,3 @@ class Usuario:
             'apellido_usuario': self.apellido_usuario,
             'correo_usuario': self.correo_usuario
         }
-
-
-
-
-
-
-
-
-
-

@@ -5,7 +5,7 @@ def _validar_area(valor: str) -> str:
         raise ValueError("El nombre del área debe ser una cadena de texto")
     if not valor.strip():
         raise ValueError("El nombre del área no puede estar vacío")
-    if not re.match(r'^[^\W\d_]+(?:\s[^\W\d_]+)*$', valor, re.UNICODE):
+    if not re.match(r'^[\w\sáéíóúÁÉÍÓÚñÑ]+$', valor):
         raise ValueError(f"El área solo puede contener letras y espacios")
     if len(valor) > 30:
         raise ValueError("El nombre del área no puede superar los 30 caracteres")
