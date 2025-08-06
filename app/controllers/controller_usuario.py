@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.models.model_usuario import Usuario
 from app.dao.dao_usuario import UsuarioDAO
-from app.db.conexion_db import ConexionDB
+from db.conexion_db import ConexionDB
 
 usuario_bp = Blueprint('usuario', __name__, url_prefix='/usuarios')
 
@@ -11,7 +11,9 @@ usuario_dao = UsuarioDAO(conexion)
 @usuario_bp.route('/', methods=['GET'])
 def obtener_todos_usuarios():
     usuarios = usuario_dao.obtener_todos_usuario_DAO()
-    return jsonify([u.to_dict() for u in usuarios]), 200
+    if usuarios:
+        return jsonify([u.to_dict() for u in usuarios]), 200
+    return jsonify({'error': 'Usuario no encontrado'}), 404
 
 @usuario_bp.route('/<id_usuario>', methods=['GET'])
 def obtener_por_id_usuario(id_usuario):
@@ -22,9 +24,9 @@ def obtener_por_id_usuario(id_usuario):
 
 @usuario_bp.route('/', methods=['POST'])
 def crear_usuario():
-    data = request.get_json()
+    data = request.get_json() #Convierte el JSON recibidio en un diccionario de Python
     try:
-        nuevo_usuario = Usuario(**data)
+        nuevo_usuario = Usuario(**data) #Crear el objeto
         resultado = usuario_dao.insertar_usuario_DAO(nuevo_usuario)
         if resultado:
             return jsonify({'mensaje': 'Usuario insertado correctamente'}), 201

@@ -1,5 +1,10 @@
 import re
 
+def _validar_id(valor: str) -> str:
+    if len(valor) !=8 or not valor.isdigit():
+        raise ValueError("El ID debe contener 8 dígitos numéricos")
+    return valor
+
 def _validar_nombre_o_apellido(valor: str, campo: str) -> str:
     if not isinstance(valor, str):
         raise ValueError(f"El {campo} debe ser una cadena de texto")
@@ -32,9 +37,7 @@ class Usuario:
         return self._id_usuario
     @id_usuario.setter
     def id_usuario(self, valor: str) -> None:
-        if len(valor) !=8 or not valor.isdigit():
-            raise ValueError("El ID debe contener 8 dígitos numéricos")
-        self._id_usuario = valor
+        self._id_usuario = _validar_id(valor)
 
     @property
     def nombre_usuario(self) -> str:

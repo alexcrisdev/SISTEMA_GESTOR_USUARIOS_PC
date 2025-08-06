@@ -1,14 +1,14 @@
 from flask import request, Blueprint, jsonify
 from app.models.model_area import Area
 from app.dao.dao_area import AreaDAO
-from app.db.conexion_db import ConexionDB
+from db.conexion_db import ConexionDB
 
 area_bp = Blueprint('area', __name__, url_prefix='/areas')
 
 conexion = ConexionDB()
 area_dao = AreaDAO(conexion)
 
-@area_bp.route('', methods=['GET'])
+@area_bp.route('/', methods=['GET'])
 def obtener_areas():
     resultados = area_dao.obtener_todos_area_DAO()
     return jsonify([u.to_dict() for u in resultados]), 200

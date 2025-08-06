@@ -1,6 +1,6 @@
 import logging
 from typing import List, Optional
-from app.db.conexion_db import ConexionDB
+from db.conexion_db import ConexionDB
 from app.models.model_area import Area
 from mysql.connector import Error
 

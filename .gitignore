@@ -1,16 +1,45 @@
-# Entorno virtual
+# Entorno virtual y paquetes
 venv/
-
-# Archivos temporales
-__pycache__/
-*.pyc
-
-# Archivo de configuración sensible
 .env
+*.pyc
+__pycache__/
+.pytest_cache/
+*.egg-info/
+dist/
+build/
 
-# Archivos de bases de datos temporales o de prueba
+# Configuración sensible
+.env
+*.env.local
+*.env.*.local
+
+# Bases de datos y logs
 *.sqlite3
 *.log
+*.dump
+### ¡EXCEPCIÓN! Permite archivos SQL de estructura/migraciones:
+!db/*.sql
 
-# Archivos de entorno de VSCode u otros editores
+# Editor/IDE
 .vscode/
+.idea/
+*.swp
+*.swo
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Archivos de desarrollo temporal
+temp/
+tmp/
+
+# Documentación generada
+docs/_build/
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# Entornos de prueba
+.coverage
+htmlcov/

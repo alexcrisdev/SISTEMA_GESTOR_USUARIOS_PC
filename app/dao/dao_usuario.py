@@ -1,6 +1,6 @@
 import logging
 from typing import List, Optional
-from app.db.conexion_db import ConexionDB
+from db.conexion_db import ConexionDB
 from app.models.model_usuario import Usuario
 from mysql.connector import Error
 
@@ -35,7 +35,7 @@ class UsuarioDAO:
     def insertar_usuarios_lote(self, lista_usuarios: List[dict]) -> bool:
         if not isinstance(lista_usuarios, list):
             logger.error("Tipo de dato inválido: Se esperaba una lista")
-            raise TypeError("Se esperana una lista de usuarios")
+            raise TypeError("Se esperaba una lista de usuarios")
         
         query = """
             INSERT INTO USUARIO(IdUsuario, NombreUsuario, ApellidoUsuario, CorreoUsuario)
@@ -152,7 +152,7 @@ class UsuarioDAO:
         try:
             with self.conexion.obtener_cursor() as cursor:
                 cursor.execute(query)
-                filas = cursor.fetchall()
+                filas = cursor.fetchall() #Almacenar todas las respuestas
                 logger.info(f"{len(filas)} usuarios encontrados")
                 return [Usuario(**fila) for fila in filas] if filas else []
         except Error as e:

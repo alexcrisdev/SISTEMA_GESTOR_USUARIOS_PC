@@ -1,7 +1,7 @@
 import logging
 from typing import List, Optional
 from db.conexion_db import ConexionDB
-from models.model_computadora import *
+from app.models.model_computadora import *
 from mysql.connector import Error
 
 logger = logging.getLogger(__name__)
@@ -9,6 +9,11 @@ logger = logging.getLogger(__name__)
 class ComputadoraDAO:
     def __init__(self, conexion: ConexionDB):
         self.conexion = conexion
+
+    def _validar_id(self, id_computadora: str) -> None:
+        if not isinstance(id_computadora, str) or len(id_computadora) != 6:
+            logger.error("ID no válido: debe ser una cadena de 6 caracteres.")
+            raise ValueError("ID debe ser una cadena de 6 caracteres")
 
     def insertar_computadora_DAO(self, computadora: Computadora) -> bool:
         if not isinstance(computadora, Computadora):
@@ -20,7 +25,7 @@ class ComputadoraDAO:
             VALUES(%s,%s,%s,%s,%s,%s)
         """
         valores = (computadora.id_computadora, computadora.clave_computadora, computadora.accesorios_computadora,
-                   computadora.codigo_ksd_computadora, computadora.tipo_computadora, computadora.red_computadora)
+                   computadora.codigo_ksd_computadora, computadora.tipo_computadora.value, computadora.red_computadora.value)
         
         try:
             with self.conexion.obtener_cursor() as cursor:
@@ -42,17 +47,26 @@ class ComputadoraDAO:
             INSERT INTO COMPUTADORA(IdComputadora, ClaveComputadora, AccesoriosComputadora, CodigoKSDComputadora, TipoComputadora, RedComputadora)
             VALUES(%s,%s,%s,%s,%s,%s)
         """
-        valores = ((u["id_computadora"], u["clave_computadora"], u["accesorios_computadora"],
-                    u["codigo_ksd_computadora"], u["tipo_computadora"], u["red_computadora"]) for u in lista_pc)
+        valores = [(u["id_computadora"], u["clave_computadora"], u["accesorios_computadora"],
+                    u["codigo_ksd_computadora"], u["tipo_computadora"], u["red_computadora"]) for u in lista_pc]
+        
+        try:
+            with self.conexion.obtener_cursor() as cursor:
+                cursor.executemany(query, valores)
+                self.conexion.commit()
+                logger.info(f'{len(lista_pc)} computadoras insertadas correctamente.')
+                return True
+        except Error as e:
+            self.conexion.rollback()
+            logger.error(f"Error al insertar computadoras en lote: {e}")
+            return False
 
     def actualizar_computadora_DAO(self, nueva_computadora: Computadora, id_anterior: str) -> bool:
         if not isinstance(nueva_computadora, Computadora):
             logger.error("Tipo de dato inválido: Se esperaba un objeto de la clase computadora")
             raise TypeError("Se espera un objeto de la clase computadora")
         
-        if not id_anterior or len(id_anterior) != 6:
-            logger.error("ID de computadora no válido (se espera 6 caracteres).")
-            raise ValueError("ID de computadora no válido (se espera 6 caracteres).")
+        self._validar_id(id_anterior)
 
         query = """
             UPDATE COMPUTADORA SET
@@ -84,19 +98,25 @@ class ComputadoraDAO:
             return False
         
     def obtener_computadora_por_id_DAO(self, id_computadora: str) -> Optional[Computadora]:
-        if not isinstance(id_computadora, str) or len(id_computadora) != 6:
-            logger.error("Tipo de dato inválido: Se esperaba una cadena de la clase computadora")
-            raise ValueError("ID debe ser una cadena de 6 caracteres")
+
+        self._validar_id(id_computadora)
 
         try:
             with self.conexion.obtener_cursor() as cursor:
-                cursor.execute("SELECT * FROM COMPUTADORA WHERE IdComputadora = %s",
+                cursor.execute("""SELECT 
+                                IdComputadora as id_computadora,
+                                ClaveComputadora as clave_computadora,
+                                AccesoriosComputadora as accesorios_computadora,
+                                CodigoKSDComputadora as codigo_ksd_computadora,
+                                TipoComputadora as tipo_computadora,
+                                RedComputadora as red_computadora
+                                FROM COMPUTADORA WHERE IdComputadora = %s""",
                                (id_computadora,))
                 fila = cursor.fetchone()
                 if fila:
                     #Convierte strings a Enums automáticamente
-                    fila["TipoComputadora"] = TipoComputadora(fila["TipoComputadora"])
-                    fila["RedComputadora"] = RedComputadora(fila["RedComputadora"])
+                    fila["tipo_computadora"] = TipoComputadora(fila["tipo_computadora"])
+                    fila["red_computadora"] = RedComputadora(fila["red_computadora"])
                     logger.info(f"Se obtuvo la computadora con el ID: {id_computadora}")
                     return Computadora(**fila)
                 else:
@@ -109,15 +129,21 @@ class ComputadoraDAO:
     def obtener_todas_computadora_DAO(self) -> List[Computadora]:
         try:
             with self.conexion.obtener_cursor() as cursor:
-                cursor.execute("SELECT * FROM COMPUTADORA ORDER BY idComputadora")
+                cursor.execute("""SELECT IdComputadora as id_computadora,
+                               ClaveComputadora as clave_computadora,
+                               AccesoriosComputadora as accesorios_computadora,
+                               CodigoKSDComputadora as codigo_ksd_computadora,
+                               TipoComputadora as tipo_computadora,
+                               RedComputadora as red_computadora
+                               FROM COMPUTADORA """)
                 filas = cursor.fetchall()
                 logger.info(f"{len(filas)} computadoras encontradas")
                 return [
                     Computadora(
                         **{
                             **fila,
-                            "TipoComputadora": TipoComputadora(fila["TipoComputadora"]),
-                            "RedComputadora": RedComputadora(fila["RedComputadora"])
+                            "tipo_computadora": TipoComputadora(fila["tipo_computadora"]),
+                            "red_computadora": RedComputadora(fila["red_computadora"])
                         }
                     ) 
                     for fila in filas
@@ -127,9 +153,7 @@ class ComputadoraDAO:
             return []
         
     def eliminar_computadora_DAO(self, id_computadora: str) -> bool:
-        if not isinstance(id_computadora, str) or len(id_computadora) != 6:
-            logger.error("Tipo de dato inválido: Se esperaba una cadena de la clase computadora")
-            raise ValueError("ID debe ser una cadena de 6 caracteres")
+        self._validar_id(id_computadora)
         try:
             with self.conexion.obtener_cursor() as cursor:
                 cursor.execute("DELETE FROM COMPUTADORA WHERE IdComputadora = %s", (id_computadora,))
@@ -146,9 +170,7 @@ class ComputadoraDAO:
             return False
 
     def existe_computadora_DAO(self, id_computadora: str) -> bool:
-        if not isinstance(id_computadora, str) or len(id_computadora) != 6:
-            logger.error("Tipo de dato inválido: Se esperaba una cadena de la clase computadora")
-            raise ValueError("ID debe ser una cadena de 6 caracteres")
+        self._validar_id(id_computadora)
 
         query = "SELECT 1 FROM COMPUTADORA WHERE IdComputadora = %s LIMIT 1"
         try:
@@ -164,12 +186,3 @@ class ComputadoraDAO:
         except Error as e:
             logger.error(f"Error al verificar existencia de la computadora: {e}")
             return False
-
-
-
-
-
-
-
-
-
