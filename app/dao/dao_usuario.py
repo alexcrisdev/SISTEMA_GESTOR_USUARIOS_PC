@@ -32,7 +32,7 @@ class UsuarioDAO:
             logger.error(f"Error al insertar usuario: {e}")
             return False
     
-    def insertar_usuarios_lote(self, lista_usuarios: List[dict]) -> bool:
+    def insertar_usuarios_lote(self, lista_usuarios: List[Usuario]) -> bool:
         if not isinstance(lista_usuarios, list):
             logger.error("Tipo de dato inválido: Se esperaba una lista")
             raise TypeError("Se esperaba una lista de usuarios")
