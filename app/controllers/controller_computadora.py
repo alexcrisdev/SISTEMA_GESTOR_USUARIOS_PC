@@ -67,7 +67,7 @@ def actualizar_comptuadora(id_computadora):
         else:
             return jsonify({'error': 'Error al actualizar la computadora'}), 400
     except Exception as e:
-        return jsonify({'Error': str(e)})
+        return jsonify({'Error': str(e)}), 404
 
 @computadora_bp.route('/<id_computadora>', methods=['DELETE'])
 def eliminar_computadora(id_computadora):
